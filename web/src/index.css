@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { @apply bg-bg font-sans text-ink antialiased; }
+
+@layer components {
+  .nb-range {
+    @apply h-3.5 w-full cursor-pointer appearance-none rounded-base border-3 border-ink bg-white;
+  }
+  .nb-range::-webkit-slider-thumb {
+    @apply h-6 w-6 cursor-pointer appearance-none rounded-[3px] border-3 border-ink bg-main shadow-brutal-sm;
+  }
+  .nb-range::-moz-range-thumb {
+    @apply h-5 w-5 cursor-pointer rounded-[3px] border-3 border-ink bg-main shadow-brutal-sm;
+  }
+  .nb-focus { @apply focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-danger; }
+}

@@ -1,0 +1,129 @@
+<mujoco model="hexapod">
+  <compiler angle="degree" autolimits="true"/>
+  <option timestep="0.001" integrator="implicitfast"/>
+  <visual><headlight diffuse="0.7 0.7 0.7" ambient="0.35 0.35 0.35"/></visual>
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1="1 0.97 0.9" rgb2="0.93 0.9 0.82" width="512" height="512"/>
+    <material name="grid" texture="grid" texrepeat="40 40"/>
+    <material name="body" rgba="1 1 1 1"/>
+    <material name="leg" rgba="0.23 0.81 0.67 1"/>
+    <material name="foot" rgba="1 0.82 0.25 1"/>
+  </asset>
+  <default>
+    <joint damping="0.5" armature="0.002"/>
+    <geom contype="0" conaffinity="0"/>
+    <default class="link"><geom type="capsule" size="0.011" material="leg"/></default>
+    <default class="foot">
+      <geom type="sphere" size="0.014" material="foot" mass="0.005"
+            contype="1" conaffinity="0" condim="3" friction="1.2 0.02 0.001"/>
+    </default>
+  </default>
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" diffuse="0.6 0.6 0.6"/>
+    <geom name="floor" type="plane" size="20 20 0.1" material="grid" contype="0" conaffinity="1"/>
+    <body name="torso" pos="0 0 0.1190">
+      <freejoint name="root"/>
+      <geom name="torso" type="cylinder" size="0.1100 0.017" mass="1.2" material="body"
+            contype="1" conaffinity="0"/>
+      <site name="imu" pos="0 0 0"/>
+      <body name="coxa_0" pos="0.08660 -0.05000 0" euler="0 0 -30.0">
+        <joint name="j0_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_0" pos="0.05 0 0">
+          <joint name="j0_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_0" pos="0.08 0 0">
+            <joint name="j0_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_0" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+      <body name="coxa_1" pos="0.00000 -0.10000 0" euler="0 0 -90.0">
+        <joint name="j1_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_1" pos="0.05 0 0">
+          <joint name="j1_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_1" pos="0.08 0 0">
+            <joint name="j1_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_1" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+      <body name="coxa_2" pos="-0.08660 -0.05000 0" euler="0 0 -150.0">
+        <joint name="j2_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_2" pos="0.05 0 0">
+          <joint name="j2_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_2" pos="0.08 0 0">
+            <joint name="j2_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_2" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+      <body name="coxa_3" pos="-0.08660 0.05000 0" euler="0 0 150.0">
+        <joint name="j3_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_3" pos="0.05 0 0">
+          <joint name="j3_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_3" pos="0.08 0 0">
+            <joint name="j3_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_3" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+      <body name="coxa_4" pos="0.00000 0.10000 0" euler="0 0 90.0">
+        <joint name="j4_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_4" pos="0.05 0 0">
+          <joint name="j4_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_4" pos="0.08 0 0">
+            <joint name="j4_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_4" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+      <body name="coxa_5" pos="0.08660 0.05000 0" euler="0 0 30.0">
+        <joint name="j5_coxa" axis="0 0 1" range="-45.0 45.0"/>
+        <geom class="link" fromto="0 0 0 0.05 0 0" mass="0.0500"/>
+        <body name="femur_5" pos="0.05 0 0">
+          <joint name="j5_femur" axis="0 -1 0" range="-90.0 90.0"/>
+          <geom class="link" fromto="0 0 0 0.08 0 0" mass="0.0500"/>
+          <body name="tibia_5" pos="0.08 0 0">
+            <joint name="j5_tibia" axis="0 -1 0" range="-150.0 0.0"/>
+            <geom class="link" fromto="0 0 0 0.12 0 0" mass="0.0500"/>
+            <geom name="foot_5" class="foot" pos="0.12 0 0"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="a0_coxa" joint="j0_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a0_femur" joint="j0_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a0_tibia" joint="j0_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+    <position name="a1_coxa" joint="j1_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a1_femur" joint="j1_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a1_tibia" joint="j1_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+    <position name="a2_coxa" joint="j2_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a2_femur" joint="j2_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a2_tibia" joint="j2_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+    <position name="a3_coxa" joint="j3_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a3_femur" joint="j3_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a3_tibia" joint="j3_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+    <position name="a4_coxa" joint="j4_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a4_femur" joint="j4_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a4_tibia" joint="j4_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+    <position name="a5_coxa" joint="j5_coxa" kp="20.0" ctrlrange="-0.78540 0.78540" forcerange="-1.5 1.5"/>
+    <position name="a5_femur" joint="j5_femur" kp="20.0" ctrlrange="-1.57080 1.57080" forcerange="-1.5 1.5"/>
+    <position name="a5_tibia" joint="j5_tibia" kp="20.0" ctrlrange="-2.61799 0.00000" forcerange="-1.5 1.5"/>
+  </actuator>
+</mujoco>

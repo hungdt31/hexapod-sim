@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hexapod-sim"
+version = "1.0.0"
+description = "Mô phỏng robot 6 chân (hexapod): động học, dáng đi, MuJoCo, web UI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pydantic>=2.6",
+  "pyyaml>=6.0",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+]
+
+[project.optional-dependencies]
+physics = ["mujoco>=3.1"]
+viz = ["matplotlib>=3.8"]
+rl = ["gymnasium>=0.29", "mujoco>=3.1"]
+dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.4", "mypy>=1.10", "httpx>=0.27", "types-PyYAML"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hexapod"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+mypy_path = "src"
