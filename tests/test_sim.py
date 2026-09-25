@@ -47,3 +47,17 @@ def test_mujoco_walks_without_falling():
         assert abs(roll) < np.radians(15) and abs(pitch) < np.radians(15)
         assert f.state.body_pos[2] > 0.06
     assert f.state.body_pos[0] > 2.5
+
+
+@pytest.mark.skipif(not mujoco_available(), reason="cần MuJoCo")
+def test_mujoco_rough_terrain_settles_without_blowing_up():
+    cfg = RobotConfig.load()
+    cfg.terrain.enabled = True
+    cfg.terrain.amplitude = 0.03
+    cfg.terrain.grid_n = 15
+    sim = Simulation(cfg, "mujoco")
+    for _ in range(500):
+        f = sim.step()
+        assert np.isfinite(f.state.body_pos).all()
+        assert np.isfinite(f.state.q).all()
+    assert 0.05 < f.state.body_pos[2] < 0.25

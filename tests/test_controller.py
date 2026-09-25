@@ -24,6 +24,25 @@ def test_stride_is_clamped():
     assert out.stride <= ctl.max_stride + 1e-12
 
 
+def test_balance_feedback_leans_ik_frame_toward_level():
+    cfg = RobotConfig.load()
+    cfg.stability.kp_roll = 0.5
+    cfg.stability.max_correction_deg = 90.0
+    ctl = HexapodController(cfg)
+    ik_roll, ik_pitch = ctl._ik_roll_pitch((np.radians(10), 0.0))
+    # thân cảm nhận nghiêng dương hơn đã lệnh -> khung IK bù giảm để san bằng
+    assert ik_roll < ctl.pose.roll
+    assert ik_pitch == ctl.pose.pitch  # pitch cảm nhận == đã lệnh -> sai lệch = 0, không bù
+
+
+def test_balance_feedback_disabled_ignores_sensed_rpy():
+    cfg = RobotConfig.load()
+    cfg.stability.enabled = False
+    q_no_sense = HexapodController(cfg).step(0.01, sensed_rpy=None).q
+    q_tilted = HexapodController(cfg).step(0.01, sensed_rpy=(np.radians(10), 0.0)).q
+    np.testing.assert_array_equal(q_no_sense, q_tilted)
+
+
 def test_stance_feet_fixed_in_world_when_walking():
     from hexapod.sim import Simulation
     sim = Simulation(backend="kinematic")

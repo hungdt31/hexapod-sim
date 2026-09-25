@@ -15,6 +15,7 @@ from .base import RobotState, SimBackend
 
 class KinematicBackend(SimBackend):
     name = "kinematic"
+    pose: BodyPose  # không physics: BodyPose luôn có giá trị, không như SimBackend.pose (Optional)
 
     def __init__(self, cfg: RobotConfig, pose: BodyPose | None = None) -> None:
         self.cfg = cfg

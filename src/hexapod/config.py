@@ -60,12 +60,32 @@ class SimCfg(BaseModel):
     seed: int = 42
 
 
+class StabilityCfg(BaseModel):
+    """Bù nghiêng vòng kín: dùng roll/pitch cảm nhận (từ backend) để chỉnh khung IK mỗi tick."""
+
+    enabled: bool = True
+    kp_roll: float = Field(0.3, ge=0)
+    kp_pitch: float = Field(0.3, ge=0)
+    max_correction_deg: float = Field(8.0, ge=0)
+
+
+class TerrainCfg(BaseModel):
+    """Địa hình gồ ghề cho backend MuJoCo (hfield sinh thủ tục, không cần file asset ngoài)."""
+
+    enabled: bool = False
+    amplitude: float = Field(0.03, ge=0)
+    grid_n: int = Field(21, gt=1)
+    seed: int = 0
+
+
 class RobotConfig(BaseModel):
     body: BodyCfg = BodyCfg()
     leg: LegCfg = LegCfg()
     actuator: ActuatorCfg = ActuatorCfg()
     gait: GaitCfg = GaitCfg()
     sim: SimCfg = SimCfg()
+    stability: StabilityCfg = StabilityCfg()
+    terrain: TerrainCfg = TerrainCfg()
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> RobotConfig:

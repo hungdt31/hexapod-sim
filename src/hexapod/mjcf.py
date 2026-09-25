@@ -41,6 +41,16 @@ def build_mjcf(cfg: RobotConfig) -> str:
                 f'forcerange="{-act.torque_max} {act.torque_max}"/>'
             )
     z0 = b.stand_height + FOOT_RADIUS + 0.005
+    t = cfg.terrain
+    hfield_asset = (
+        f'<hfield name="terrain" nrow="{t.grid_n}" ncol="{t.grid_n}" size="10 10 {t.amplitude} 0.1"/>'
+        if t.enabled else ""
+    )
+    floor_geom = (
+        '<geom name="floor" type="hfield" hfield="terrain" material="grid" contype="0" conaffinity="1"/>'
+        if t.enabled else
+        '<geom name="floor" type="plane" size="20 20 0.1" material="grid" contype="0" conaffinity="1"/>'
+    )
     return f"""<mujoco model="hexapod">
   <compiler angle="degree" autolimits="true"/>
   <option timestep="{cfg.sim.physics_dt}" integrator="implicitfast"/>
@@ -51,6 +61,7 @@ def build_mjcf(cfg: RobotConfig) -> str:
     <material name="body" rgba="1 1 1 1"/>
     <material name="leg" rgba="0.23 0.81 0.67 1"/>
     <material name="foot" rgba="1 0.82 0.25 1"/>
+    {hfield_asset}
   </asset>
   <default>
     <joint damping="{act.kd}" armature="0.002"/>
@@ -63,7 +74,7 @@ def build_mjcf(cfg: RobotConfig) -> str:
   </default>
   <worldbody>
     <light pos="0 0 3" dir="0 0 -1" diffuse="0.6 0.6 0.6"/>
-    <geom name="floor" type="plane" size="20 20 0.1" material="grid" contype="0" conaffinity="1"/>
+    {floor_geom}
     <body name="torso" pos="0 0 {z0:.4f}">
       <freejoint name="root"/>
       <geom name="torso" type="cylinder" size="{b.radius * 1.1:.4f} 0.017" mass="{b.mass}" material="body"

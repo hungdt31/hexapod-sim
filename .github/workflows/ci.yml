@@ -9,6 +9,7 @@ jobs:
         with: { python-version: "3.11" }
       - run: pip install -e ".[physics,dev]"
       - run: ruff check src tests scripts
+      - run: mypy src
       - run: pytest -q
   web:
     runs-on: ubuntu-latest

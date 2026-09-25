@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { useSimSocket } from "@/hooks/useSimSocket";
 import type { BackendName, GaitName } from "@/lib/types";
 import { deg, rad } from "@/lib/utils";
-import { Charts } from "@/panels/Charts";
 import { ControlPanel, type Controls } from "@/panels/ControlPanel";
 import { Telemetry } from "@/panels/Telemetry";
 import { TopBar } from "@/panels/TopBar";
-import { SceneCanvas, type CamPreset } from "@/scene/SceneCanvas";
+import type { CamPreset } from "@/scene/SceneCanvas";
+
+// Tách chunk riêng cho three.js/fiber/drei (scene) và recharts (charts) — hai phần nặng nhất bundle.
+const SceneCanvas = lazy(() => import("@/scene/SceneCanvas").then((m) => ({ default: m.SceneCanvas })));
+const Charts = lazy(() => import("@/panels/Charts").then((m) => ({ default: m.Charts })));
 
 const DEFAULTS: Controls = { vx: 0, vy: 0, wz: 0, height: 0.1, roll: 0, pitch: 0, swingHeight: 0.04 };
 
@@ -108,7 +111,9 @@ export default function App() {
               </div>
             </CardHeader>
             <div className="relative min-h-0 flex-1">
-              <SceneCanvas hello={hello} stateRef={stateRef} preset={cam} />
+              <Suspense fallback={<div className="flex h-full items-center justify-center font-bold">Đang tải 3D…</div>}>
+                <SceneCanvas hello={hello} stateRef={stateRef} preset={cam} />
+              </Suspense>
               {status !== "open" && (
                 <div className="absolute inset-0 flex items-center justify-center p-6 text-center font-bold">
                   <div className="rounded-base border-3 border-ink bg-white px-5 py-4 shadow-brutal">
@@ -118,7 +123,9 @@ export default function App() {
               )}
             </div>
           </Card>
-          <Charts history={history} />
+          <Suspense fallback={null}>
+            <Charts history={history} />
+          </Suspense>
         </main>
 
         <div className="lg:col-start-1 lg:row-start-1 lg:flex lg:min-h-0 lg:flex-col">

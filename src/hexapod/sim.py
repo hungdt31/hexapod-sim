@@ -74,14 +74,14 @@ class Simulation:
         self.controller.set_gait(gait)
         self.controller.set_body_pose(pose.height, pose.roll, pose.pitch)
         self.controller.set_command(cmd.vx, cmd.vy, cmd.wz)
-        if hasattr(self.backend, "pose"):
-            self.backend.pose = self.controller.pose  # type: ignore[attr-defined]
+        self.backend.pose = self.controller.pose
         self.state = self.backend.reset(self.controller.standing_q())
         self.last = None
 
     def step(self, dt: float | None = None) -> Frame:
         dt = dt or self.cfg.sim.control_dt
-        out = self.controller.step(dt)
+        prev_rpy = self.state.rpy
+        out = self.controller.step(dt, sensed_rpy=(prev_rpy[0], prev_rpy[1]))
         self.state = self.backend.step(out.q, dt, out)
         stance = self.state.feet[self.state.contacts]
         poly = convex_hull(stance) if len(stance) else np.zeros((0, 2))

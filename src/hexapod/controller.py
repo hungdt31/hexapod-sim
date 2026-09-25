@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -74,15 +75,33 @@ class HexapodController:
     def standing_q(self) -> np.ndarray:
         return np.stack([self._solve(i, self.home[i])[0] for i in range(6)])
 
-    def _solve(self, i: int, p_heading: np.ndarray) -> tuple[np.ndarray, bool]:
-        p_body = self.pose.heading_to_body(p_heading)
+    def _solve(self, i: int, p_heading: np.ndarray, roll: float | None = None,
+               pitch: float | None = None) -> tuple[np.ndarray, bool]:
+        p_body = self.pose.heading_to_body(p_heading, roll, pitch)
         p_leg = BodyPose.body_to_leg(p_body, self.mounts[i], self.mount_angles[i])
         return self.leg.ik_clamped(p_leg)
 
-    def step(self, dt: float) -> ControlOutput:
+    def _ik_roll_pitch(self, sensed_rpy: tuple[float, float] | None) -> tuple[float | None, float | None]:
+        """Bù nghiêng vòng kín: chỉnh khung IK theo sai lệch roll/pitch cảm nhận so với đã lệnh.
+
+        Với backend kinematic, roll/pitch cảm nhận luôn bằng đúng giá trị đã lệnh (không có vật lý),
+        nên sai lệch = 0 và hàm này là phép identity (không đổi hành vi). Chỉ có tác dụng khi backend
+        vật lý (MuJoCo) khiến thân nghiêng ngoài ý muốn."""
+        sc = self.cfg.stability
+        if not sc.enabled or sensed_rpy is None:
+            return None, None
+        max_c = math.radians(sc.max_correction_deg)
+        err_roll = sensed_rpy[0] - self.pose.roll
+        err_pitch = sensed_rpy[1] - self.pose.pitch
+        corr_roll = max(-max_c, min(max_c, sc.kp_roll * err_roll))
+        corr_pitch = max(-max_c, min(max_c, sc.kp_pitch * err_pitch))
+        return self.pose.roll - corr_roll, self.pose.pitch - corr_pitch
+
+    def step(self, dt: float, sensed_rpy: tuple[float, float] | None = None) -> ControlOutput:
         self.t += dt
         self.scheduler.step(dt)
         sch, cmd = self.scheduler, self.command
+        ik_roll, ik_pitch = self._ik_roll_pitch(sensed_rpy)
         q = np.zeros((6, 3))
         swing = np.zeros(6, dtype=bool)
         prog = np.zeros(6)
@@ -93,7 +112,7 @@ class HexapodController:
             sw, s = sch.phase(i)
             p, st = foot_target(self.home[i], cmd.vx, cmd.vy, cmd.wz, sch.beta, sch.period,
                                 sw, s, self.swing_height, self.max_stride)
-            q[i], ok = self._solve(i, p)
+            q[i], ok = self._solve(i, p, ik_roll, ik_pitch)
             swing[i], prog[i], feet[i], warn[i] = sw, s, p, not ok
             stride = max(stride, st)
         return ControlOutput(q, swing, prog, feet, warn, stride, cmd)

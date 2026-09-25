@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from ..body import BodyPose
 from ..geometry import matrix_to_rpy, quat_to_matrix
 
 
@@ -27,6 +28,7 @@ class RobotState:
 
 class SimBackend(ABC):
     name: str = "base"
+    pose: BodyPose | None = None  # tư thế thân do controller lệnh; chỉ backend không-vật-lý cần dùng
 
     @abstractmethod
     def reset(self, q0: np.ndarray) -> RobotState: ...

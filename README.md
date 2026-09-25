@@ -1,8 +1,14 @@
 # Hexapod Sim — mô phỏng robot 6 chân bằng Python
 
+> **English summary:** a Python simulator for an 18-DOF (6×3) hexapod robot — analytic forward/inverse
+> kinematics, tripod/ripple/wave gaits, a closed-loop posture-leveling controller, a kinematic backend and
+> a MuJoCo physics backend (with optional procedural rough terrain), a React/Three.js web UI, CSV logging,
+> and a Gymnasium wrapper for RL. See the sections below (in Vietnamese) for setup and usage; the code and
+> `CLAUDE.md` are in English. MIT licensed.
+
 Mô phỏng hexapod 18 khớp (6 chân × 3 DOF): động học thuận/nghịch giải tích, dáng đi tripod/ripple/wave,
-tư thế thân, backend **kinematic** và **MuJoCo** (vật lý), web UI 3D phong cách NeoBrutalism,
-log CSV và wrapper Gymnasium cho RL.
+tư thế thân, cân bằng vòng kín (bù nghiêng), backend **kinematic** và **MuJoCo** (vật lý, có thể bật địa
+hình gồ ghề), web UI 3D phong cách NeoBrutalism, log CSV và wrapper Gymnasium cho RL.
 
 ## Yêu cầu
 
@@ -38,6 +44,7 @@ Muốn sửa giao diện với hot reload: chạy server như bước 3, rồi �
 | `python scripts/run_physics.py --export-mjcf models/hexapod.xml` | Xuất mô hình MJCF từ config |
 | `pytest -q` | Chạy test Python |
 | `cd web && npm test` | Chạy test frontend |
+| `docker build -t hexapod-sim .` rồi `docker run -p 8000:8000 hexapod-sim` | Build + chạy server trong container (backend kinematic mặc định; đổi backend bằng cách override CMD) |
 
 ## Điều khiển trên web UI
 
@@ -78,6 +85,14 @@ web/                     React + TypeScript + Tailwind + react-three-fiber
 - Hệ thế giới: Z hướng lên, X hướng về trước. Chân đánh số 0–5: RF, RM, RR, LR, LM, LF.
 - θ2 dương = nâng đùi; θ3 = 0 khi duỗi thẳng, âm khi gập xuống. IK chọn nghiệm "gối hướng lên".
 
+## Cân bằng và địa hình (config)
+
+- `stability`: bộ điều khiển P bù nghiêng — mỗi tick, khung IK được chỉnh theo sai lệch giữa roll/pitch
+  cảm nhận (từ backend) và roll/pitch đã lệnh, giúp thân đỡ nghiêng khi chạy MuJoCo. Với backend
+  kinematic, sai lệch luôn bằng 0 nên không đổi hành vi. Tắt bằng `stability.enabled: false` trong YAML.
+- `terrain`: bật `terrain.enabled: true` để sinh địa hình gồ ghề (hfield) xác định (theo `seed`) cho
+  MuJoCo, biên độ `amplitude` (m). Mặc định tắt (nền phẳng như trước).
+
 ## Thêm dáng đi mới
 
 Tạo một class trong `src/hexapod/gait/`, khai báo `name`, `beta`, `period`, `offsets`, `min_stance`,
@@ -86,5 +101,11 @@ rồi thêm vào `GAITS` trong `gait/__init__.py`. Không cần sửa controller
 ## Giới hạn hiện tại
 
 - Backend kinematic không có vật lý: robot không ngã, chân có thể trượt nhẹ khi đổi vận tốc đột ngột.
-- Controller chạy vòng hở (không dùng IMU để cân bằng); MuJoCo đi ổn định trên nền phẳng với cấu hình mặc định.
+- Cân bằng vòng kín (`stability`) chỉ chỉnh khung IK theo roll/pitch cảm nhận — không phải điều khiển
+  lực/mô-men, và gait vẫn thuần theo pha thời gian (không rút ngắn/kéo dài swing theo tiếp xúc chân thực
+  tế), nên trên địa hình gồ ghề robot có thể vẫn vấp nếu biên độ lớn so với `swing_height`.
 - Web UI chỉ đọc thông số hình học lúc kết nối; đổi file config cần khởi động lại server.
+
+## Giấy phép
+
+MIT — xem [LICENSE](LICENSE).

@@ -43,6 +43,9 @@ class CsvLogger:
         self._w.writerow(row)
         self.rows += 1
 
+    def flush(self) -> None:
+        self._f.flush()
+
     def close(self) -> None:
         self._f.close()
 

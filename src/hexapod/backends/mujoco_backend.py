@@ -18,6 +18,18 @@ def mujoco_available() -> bool:
     return mujoco is not None
 
 
+def _generate_terrain(nrow: int, ncol: int, seed: int) -> np.ndarray:
+    """Lưới độ cao [0,1] xác định (seedable), làm mượt bằng vài vòng trung bình lân cận."""
+    rng = np.random.default_rng(seed)
+    grid = rng.uniform(0.0, 1.0, size=(nrow, ncol))
+    for _ in range(3):
+        grid = (grid + np.roll(grid, 1, axis=0) + np.roll(grid, -1, axis=0)
+                + np.roll(grid, 1, axis=1) + np.roll(grid, -1, axis=1)) / 5.0
+    grid -= grid.min()
+    peak = grid.max()
+    return grid / peak if peak > 0 else grid
+
+
 class MujocoBackend(SimBackend):
     name = "mujoco"
 
@@ -27,6 +39,12 @@ class MujocoBackend(SimBackend):
         self.cfg = cfg
         self.xml = build_mjcf(cfg)
         self.model = mujoco.MjModel.from_xml_string(self.xml)
+        if cfg.terrain.enabled:
+            hid = self.model.hfield("terrain").id
+            nrow, ncol = int(self.model.hfield_nrow[hid]), int(self.model.hfield_ncol[hid])
+            adr = int(self.model.hfield_adr[hid])
+            grid = _generate_terrain(nrow, ncol, cfg.terrain.seed)
+            self.model.hfield_data[adr:adr + nrow * ncol] = grid.reshape(-1).astype(np.float32)
         self.data = mujoco.MjData(self.model)
         self.torso = self.model.body("torso").id
         self.floor = self.model.geom("floor").id
@@ -38,7 +56,8 @@ class MujocoBackend(SimBackend):
 
     def reset(self, q0: np.ndarray) -> RobotState:
         mujoco.mj_resetData(self.model, self.data)
-        self.data.qpos[2] = self.cfg.body.stand_height + FOOT_RADIUS + 0.002
+        extra = self.cfg.terrain.amplitude if self.cfg.terrain.enabled else 0.0
+        self.data.qpos[2] = self.cfg.body.stand_height + FOOT_RADIUS + 0.002 + extra
         self.data.qpos[self.joint_qadr] = np.asarray(q0).reshape(-1)
         self.data.ctrl[:] = np.asarray(q0).reshape(-1)
         mujoco.mj_forward(self.model, self.data)

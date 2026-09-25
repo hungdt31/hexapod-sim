@@ -48,7 +48,7 @@ def create_app(cfg: RobotConfig | None = None, backend: str | None = None, log_d
     async def log_csv():
         if not runner.logger:
             return PlainTextResponse("Server chạy không bật log. Thêm --log-dir runs khi khởi động.", status_code=404)
-        runner.logger._f.flush()
+        runner.logger.flush()
         return FileResponse(runner.logger.path, filename="state.csv", media_type="text/csv")
 
     @app.websocket("/ws")

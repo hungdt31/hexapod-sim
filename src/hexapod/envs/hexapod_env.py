@@ -19,7 +19,7 @@ from ..sim import Simulation
 
 
 class HexapodEnv(gym.Env):
-    metadata = {"render_modes": []}
+    metadata: dict[str, list[str]] = {"render_modes": []}
 
     def __init__(self, backend: str = "mujoco", episode_seconds: float = 10.0,
                  target_vx: float = 0.05, residual_scale: float = 0.3) -> None:
